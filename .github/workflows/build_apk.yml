@@ -16,35 +16,47 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # --- STEP 1: Build Linux Rootfs ---
+      - name: Build Rootfs
+        run: |
+          mkdir core_build && cd core_build
+          wget https://github.com/debuerreotype/docker-debian-artifacts/raw/dist-arm64v8/bookworm/rootfs.tar.xz -O base.tar.xz
+          mkdir rootfs && tar -xf base.tar.xz -C rootfs
+          cp ../scripts/linux/setup_gui.sh rootfs/tmp/ || true
+          cp ../scripts/linux/aeon_boot.sh rootfs/tmp/ || true
+          tar -czf ../aeondesk-core-arm64.tar.gz .
+          cd ..
+
+      # --- STEP 2: Setup Flutter & Build APK ---
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0' # একটু লেটেস্ট ভার্সন দিচ্ছি ফন্ট এরর কাটাতে
+          flutter-version: '3.19.0'
           channel: 'stable'
 
-      - name: Scaffold Project
+      - name: Scaffold & Build APK
         run: |
           flutter create build_dir --org com.aeoncorex --project-name aeondesk
-          
-          # SDK 34 ফিক্স করার জন্য build.gradle আপডেট
           sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' build_dir/android/app/build.gradle
           sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' build_dir/android/app/build.gradle
-          
           cp -r app_source/lib/* build_dir/lib/
           cp app_source/pubspec.yaml build_dir/
           mkdir -p build_dir/assets/images
           cp app_source/assets/images/icon.png build_dir/assets/images/icon.png || true
-          
           cd build_dir
           flutter pub get
           flutter build apk --release --split-per-abi
 
+      # --- STEP 3: Upload Everything to Release ---
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: \${{ github.ref_name }}
-          name: AeonDesk Release \${{ github.ref_name }}
-          files: build_dir/build/app/outputs/flutter-apk/app-release.apk
+          tag_name: ${{ github.ref_name }}
+          name: AeonDesk Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            build_dir/build/app/outputs/flutter-apk/app-release.apk
+            aeondesk-core-arm64.tar.gz
         env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
