@@ -16,16 +16,22 @@ jobs:
       - name: Build Rootfs
         run: |
           mkdir build && cd build
-          # Using a more reliable Debian mirror for ARM64
-          wget https://github.com/termux/proot-distro/releases/download/v4.1.0/debian-bookworm-aarch64-pd-v4.1.0.tar.xz -O base.tar.xz
+          
+          # Stable Alternative: Downloading from official Debian Backends or a permanent mirror
+          # We will use the latest Debian Bookworm Rootfs from a reliable source
+          wget https://github.com/debuerreotype/docker-debian-artifacts/raw/dist-arm64v8/bookworm/rootfs.tar.xz -O base.tar.xz
           
           mkdir rootfs
           tar -xf base.tar.xz -C rootfs
           
+          # Inject scripts
           cp ../scripts/linux/setup_gui.sh rootfs/tmp/
           cp ../scripts/linux/aeon_boot.sh rootfs/tmp/
           
+          # Versioning
           echo "AeonDesk_Core_v1_$(date +%F)" > rootfs/etc/aeondesk_version
+          
+          # Compress for Release
           tar -czf ../aeondesk-core-arm64.tar.gz .
       
       - name: Upload Artifact
