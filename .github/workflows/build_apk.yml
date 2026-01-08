@@ -1,0 +1,35 @@
+name: Build AeonDesk APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      # এখানে Flutter সেটআপ করা হয়েছে (যদি আপনি Flutter ব্যবহার করেন)
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.x'
+          
+      - name: Get Dependencies
+        working-directory: ./android
+        run: flutter pub get
+        
+      - name: Build APK
+        working-directory: ./android
+        run: flutter build apk --release --split-per-abi
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aeondesk-release-apk
+          path: android/build/app/outputs/flutter-apk/app-release.apk

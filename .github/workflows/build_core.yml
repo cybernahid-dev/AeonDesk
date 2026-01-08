@@ -1,0 +1,48 @@
+name: Build AeonDesk Core (Rootfs)
+
+on:
+  push:
+    paths:
+      - 'scripts/linux/**'
+      - '.github/workflows/build_core.yml'
+  workflow_dispatch:
+
+jobs:
+  build-rootfs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: sudo apt-get install -y debootstrap qemu-user-static tar xz-utils
+
+      - name: Build Minimal Kali Rootfs
+        run: |
+          mkdir build
+          # এখানে আমরা একটি বেস রুটএফএস ডাউনলোড করছি (উদাহরণস্বরূপ)
+          # আসল প্রোডাকশনে debootstrap ব্যবহার করে জেনারেট করা ভালো
+          wget -O base.tar.xz https://github.com/termux/proot-distro/releases/download/v3.13.0/ubuntu-jammy-aarch64-pd-v3.13.0.tar.xz
+          
+          mkdir rootfs
+          tar -xf base.tar.xz -C rootfs
+          
+          # Customization Script Copy
+          cp scripts/linux/setup_gui.sh rootfs/tmp/
+          
+          # Proot Mode এ ঢুকে সেটআপ চালানো (Simulated)
+          # GitHub Actions এ এটি সরাসরি রান করা জটিল, তাই আমরা স্ক্রিপ্টটি ইঞ্জেক্ট করে রাখছি
+          # ইউজার যখন অ্যাপ ওপেন করবে তখন এটি রান হবে
+          
+          echo "AeonDesk Core Built at $(date)" > rootfs/etc/aeondesk_version
+
+      - name: Compress Rootfs
+        run: |
+          cd rootfs
+          tar -czf ../aeondesk-core-arm64.tar.gz .
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aeondesk-rootfs
+          path: aeondesk-core-arm64.tar.gz

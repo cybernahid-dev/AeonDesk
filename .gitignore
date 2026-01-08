@@ -1,0 +1,42 @@
+# Android / Flutter
+build/
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+android/app/debug/
+android/app/profile/
+android/app/release/
+*.apk
+*.aab
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Linux Rootfs & Large Files
+*.tar
+*.tar.gz
+*.tar.xz
+*.rootfs
+core.tar.gz
+aeondesk-rootfs/
+scripts/linux/tmp/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+
