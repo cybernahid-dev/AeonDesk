@@ -2,34 +2,47 @@ name: Build AeonDesk APK
 
 on:
   push:
-    branches: [ "main" ]
+    paths:
+      - 'app_source/**'
+      - '.github/workflows/build_apk.yml'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-      
-      # এখানে Flutter সেটআপ করা হয়েছে (যদি আপনি Flutter ব্যবহার করেন)
-      - uses: subosito/flutter-action@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.x'
+          channel: 'stable'
+
+      - name: Scaffold Flutter Project
+        run: |
+          # Cloud-এ নতুন একটি Flutter প্রজেক্ট তৈরি করছি
+          flutter create aeondesk_build --org com.aeoncorex --project-name aeondesk
           
-      - name: Get Dependencies
-        working-directory: ./android
+          # আমাদের লেখা সোর্স কোডগুলো সেখানে কপি করছি
+          cp -r app_source/lib/* aeondesk_build/lib/
+          cp app_source/pubspec.yaml aeondesk_build/
+          
+          # Assets থাকলে সেগুলোও কপি হবে
+          mkdir -p aeondesk_build/assets
+          cp -r app_source/assets/* aeondesk_build/assets/ || true
+
+      - name: Install Dependencies
+        working-directory: ./aeondesk_build
         run: flutter pub get
-        
+
       - name: Build APK
-        working-directory: ./android
+        working-directory: ./aeondesk_build
         run: flutter build apk --release --split-per-abi
-        
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: aeondesk-release-apk
-          path: android/build/app/outputs/flutter-apk/app-release.apk
+          name: aeondesk-app-release
+          path: aeondesk_build/build/app/outputs/flutter-apk/app-release.apk
