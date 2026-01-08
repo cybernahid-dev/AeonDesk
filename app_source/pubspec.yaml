@@ -9,12 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^6.1.0  # ফিউচারিস্টিক ফন্টের জন্য
-  provider: ^6.0.0      # স্টেট ম্যানেজমেন্ট
-  http: ^1.1.0          # রুটএফএস ডাউনলোডের জন্য
-  archive: ^3.3.0       # জিপ ফাইল এক্সট্র্যাক্ট করার জন্য
-  shared_preferences: ^2.2.0 # সেটিংস সেভ রাখার জন্য
-  flutter_terminal_view: ^0.2.0 # (Optional) যদি টার্মিনাল দেখাতে চান
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  archive: ^3.3.7
+  permission_handler: ^11.0.1
+
 
 flutter:
   uses-material-design: true

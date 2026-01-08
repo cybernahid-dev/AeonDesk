@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - 'app_source/**'
-      - '.github/workflows/build_apk.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,23 +19,20 @@ jobs:
           flutter-version: '3.16.x'
           channel: 'stable'
 
-      - name: Scaffold Flutter Project
+      - name: Scaffold & Build Icons
         run: |
-          # Cloud-এ নতুন একটি Flutter প্রজেক্ট তৈরি করছি
           flutter create aeondesk_build --org com.aeoncorex --project-name aeondesk
-          
-          # আমাদের লেখা সোর্স কোডগুলো সেখানে কপি করছি
           cp -r app_source/lib/* aeondesk_build/lib/
           cp app_source/pubspec.yaml aeondesk_build/
+          mkdir -p aeondesk_build/assets/images
+          # আপনার লোগো ইমেজটি এখানে কপি হবে
+          cp app_source/assets/images/icon.png aeondesk_build/assets/images/icon.png || true
           
-          # Assets থাকলে সেগুলোও কপি হবে
-          mkdir -p aeondesk_build/assets
-          cp -r app_source/assets/* aeondesk_build/assets/ || true
-
-      - name: Install Dependencies
-        working-directory: ./aeondesk_build
-        run: flutter pub get
-
+          cd aeondesk_build
+          flutter pub get
+          # এই কমান্ডটি আইকন জেনারেট করবে
+          flutter pub run flutter_launcher_icons:main
+          
       - name: Build APK
         working-directory: ./aeondesk_build
         run: flutter build apk --release --split-per-abi
@@ -44,5 +40,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: aeondesk-app-release
+          name: aeondesk-app-with-logo
           path: aeondesk_build/build/app/outputs/flutter-apk/app-release.apk
