@@ -3,14 +3,14 @@ name: Build and Auto-Release AeonDesk
 on:
   push:
     tags:
-      - 'v*' # যখনই আপনি v1.0.0 এর মতো ট্যাগ পুশ করবেন, রিলিজ হবে
-  workflow_dispatch: # ম্যানুয়ালি রান করার অপশন
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # রিলিজ ক্রিয়েট করার পারমিশন
+      contents: write
     
     steps:
       - name: Checkout Code
@@ -19,31 +19,32 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.x'
+          flutter-version: '3.19.0' # একটু লেটেস্ট ভার্সন দিচ্ছি ফন্ট এরর কাটাতে
           channel: 'stable'
 
-      - name: Build APK
+      - name: Scaffold Project
         run: |
           flutter create build_dir --org com.aeoncorex --project-name aeondesk
+          
+          # SDK 34 ফিক্স করার জন্য build.gradle আপডেট
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' build_dir/android/app/build.gradle
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' build_dir/android/app/build.gradle
+          
           cp -r app_source/lib/* build_dir/lib/
           cp app_source/pubspec.yaml build_dir/
           mkdir -p build_dir/assets/images
           cp app_source/assets/images/icon.png build_dir/assets/images/icon.png || true
+          
           cd build_dir
           flutter pub get
-          flutter pub run flutter_launcher_icons:main || true
           flutter build apk --release --split-per-abi
 
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: \${{ github.ref_name }}
           name: AeonDesk Release \${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          files: |
-            build_dir/build/app/outputs/flutter-apk/app-release.apk
+          files: build_dir/build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 
