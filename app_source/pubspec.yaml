@@ -1,6 +1,6 @@
 name: aeondesk
-description: Zero-touch Linux Desktop for Android
-publish_to: 'none'
+description: Next-gen Zero-Touch Linux Desktop platform for Android.
+publish_to: 'none' # এটি পাবলিক পাবলিশ করা থেকে বিরত রাখবে
 version: 1.0.0+1
 
 environment:
@@ -9,13 +9,45 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
-  path_provider: ^2.1.1
-  archive: ^3.3.7
-  permission_handler: ^11.0.1
 
+  # UI & Design
+  google_fonts: ^6.1.0        # Futuristic JetBrains Mono ফন্টের জন্য
+  cupertino_icons: ^1.0.6
+  
+  # Services & Logic
+  http: ^1.1.0               # Rootfs ডাউনলোডের জন্য
+  path_provider: ^2.1.1      # ইন্টারনাল স্টোরেজ পাথ পাওয়ার জন্য
+  archive: ^3.3.7            # .tar.gz ফাইল এক্সট্র্যাক্ট করার জন্য
+  shared_preferences: ^2.2.2  # ইন্সটলেশন স্ট্যাটাস সেভ রাখার জন্য
+  permission_handler: ^11.0.1 # স্টোরেজ পারমিশন হ্যান্ডেল করার জন্য
+  url_launcher: ^6.2.1       # গিটহাব বা ওয়েবসাইট লিংক ওপেন করার জন্য
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Launcher Icon Generator (এটি অটোমেটিক লোগো সেট করবে)
+  flutter_launcher_icons: "^0.13.1"
+
+# --- AeonDesk Launcher Icon Configuration ---
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/icon.png"
+  adaptive_icon_background: "#050A0E" # AeonCoreX Theme Color
+  adaptive_icon_foreground: "assets/images/icon.png"
 
 flutter:
   uses-material-design: true
+
+  # Assets Definition
   assets:
     - assets/images/
+    # - assets/scripts/ (ভবিষ্যতে স্ক্রিপ্ট যোগ করলে এখানে এড করবেন)
+
+  # ফন্ট কনফিগারেশন (ঐচ্ছিক, যদি কাস্টম ফন্ট ফাইল ব্যবহার করেন)
+  # fonts:
+  #   - family: CyberFont
+  #     fonts:
+  #       - asset: assets/fonts/cyber_font.ttf
